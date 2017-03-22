@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +15,7 @@ import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
     //Code from this program has been used from "Beginning Android Games" by Mario Zechner
     //Review SurfaceView, Canvas, continue
 
@@ -24,6 +26,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         gameSurface = new GameSurface(this);
         setContentView(gameSurface);
+
+        SensorManager manager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor accel = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        manager.registerListener(this, accel, SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        gameSurface.setXAccel((int) event.values[0]);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
     @Override
@@ -48,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         volatile boolean running = false;
         Bitmap myImage;
         Paint paintProperty;
+        int xAccel;
 
         int screenWidth;
         int screenHeight;
@@ -72,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            int value = 5;
             while (running == true){
 
                 if (holder.getSurface().isValid() == false)
@@ -79,9 +97,20 @@ public class MainActivity extends AppCompatActivity {
 
                 Canvas canvas= holder.lockCanvas();
                 canvas.drawRGB(0,255,0);
-                canvas.drawText("Hello World",50,200,paintProperty);
-                int value = 5;
-                canvas.drawBitmap( myImage,100+value,200,null);
+
+                if((Integer) xAccel != null){
+                    if(xAccel > 0){
+                        value-=5;
+                    }
+                    else if(xAccel < 0){
+                        value+=5;
+                    }
+                    else{
+
+                    }
+                }
+
+                canvas.drawBitmap( myImage,100+value , 200,null);
 
                 holder.unlockCanvasAndPost(canvas);
             }
@@ -101,6 +130,10 @@ public class MainActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                 }
             }
+        }
+
+        public void setXAccel(int xAccel){
+            this.xAccel = xAccel;
         }
 
 
