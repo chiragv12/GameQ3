@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,6 +15,8 @@ import android.os.Bundle;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     //Code from this program has been used from "Beginning Android Games" by Mario Zechner
@@ -63,8 +66,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         SurfaceHolder holder;
         volatile boolean running = false;
         Bitmap myImage;
+        Bitmap myImage2;
         Paint paintProperty;
         int xAccel;
+        ArrayList<Enemy> enemyList = new ArrayList<>();
 
         int screenWidth;
         int screenHeight;
@@ -75,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             holder=getHolder();
 
             myImage = BitmapFactory.decodeResource(getResources(),R.drawable.ship);
+            myImage2 = BitmapFactory.decodeResource(getResources(), R.drawable.brokenship);
 
             Display screenDisplay = getWindowManager().getDefaultDisplay();
             Point sizeOfScreen = new Point();
@@ -90,9 +96,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         public void run() {
             int value = 5;
-            while (running == true){
+            while (running){
 
-                if (holder.getSurface().isValid() == false)
+                if (!holder.getSurface().isValid())
                     continue;
 
                 Canvas canvas= holder.lockCanvas();
@@ -100,17 +106,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 if((Integer) xAccel != null){
                     if(xAccel > 0){
-                        value-=5;
+                        value-= (xAccel * 5);
                     }
                     else if(xAccel < 0){
-                        value+=5;
+                        value-= (xAccel * 5);
                     }
                     else{
 
                     }
                 }
 
-                canvas.drawBitmap( myImage,100+value , 200,null);
+                canvas.drawBitmap(myImage,100+value, 2000, null);
+                Rect hitBox = new Rect(100 + value, 2000, 100 + value + myImage.getWidth(), 2000 + myImage.getHeight());
+                //canvas.drawRect(hitBox, new Paint());
+
+                Enemy enemy = new Enemy();
+                enemyList.add(enemy);
+
+                for(int i = 0; i < enemyList.size(); i++){
+                    enemyList.get(i).move();
+
+
+                }
+
+
+
 
                 holder.unlockCanvasAndPost(canvas);
             }
