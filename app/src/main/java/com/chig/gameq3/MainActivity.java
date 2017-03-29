@@ -67,9 +67,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         volatile boolean running = false;
         Bitmap myImage;
         Bitmap myImage2;
+        Bitmap enemy;
         Paint paintProperty;
         int xAccel;
-        ArrayList<Enemy> enemyList = new ArrayList<>();
 
         int screenWidth;
         int screenHeight;
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             myImage = BitmapFactory.decodeResource(getResources(),R.drawable.ship);
             myImage2 = BitmapFactory.decodeResource(getResources(), R.drawable.brokenship);
+            enemy = BitmapFactory.decodeResource(getResources(), R.drawable.enemy);
 
             Display screenDisplay = getWindowManager().getDefaultDisplay();
             Point sizeOfScreen = new Point();
@@ -96,13 +97,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         public void run() {
             int value = 5;
+            int enemyXVal = (int)(Math.random() * (screenWidth - 50)) + 50;
+            int enemyYVal = 0;
             while (running){
 
                 if (!holder.getSurface().isValid())
                     continue;
 
                 Canvas canvas= holder.lockCanvas();
-                canvas.drawRGB(0,255,0);
+                canvas.drawRGB(0, 0, 255);
 
                 if((Integer) xAccel != null){
                     if(xAccel > 0){
@@ -117,24 +120,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
 
                 canvas.drawBitmap(myImage,100+value, 2000, null);
+                canvas.drawBitmap(enemy, enemyXVal, enemyYVal, null);
+
                 Rect hitBox = new Rect(100 + value, 2000, 100 + value + myImage.getWidth(), 2000 + myImage.getHeight());
-                //canvas.drawRect(hitBox, new Paint());
+                Rect enemyHitBox = new Rect(enemyXVal, enemyYVal, enemyXVal + enemy.getWidth(), enemyYVal + enemy.getHeight());
+                //canvas.drawRect(enemyHitBox, new Paint());
+                enemyYVal += 25;
 
-                Enemy enemy = new Enemy();
-                enemyList.add(enemy);
-
-                for(int i = 0; i < enemyList.size(); i++){
-                    enemyList.get(i).move();
-
-
+                if(enemyYVal >= screenHeight){
+                    enemyYVal = 0;
+                    enemyXVal = (int)(Math.random() * (screenWidth - 50)) + 50;
                 }
 
-
-
-
                 holder.unlockCanvasAndPost(canvas);
-            }
-        }
+            }//while running
+        }//run
 
         public void resume(){
             running=true;
