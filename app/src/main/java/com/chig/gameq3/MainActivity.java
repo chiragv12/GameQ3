@@ -12,9 +12,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.ArrayList;
 
@@ -74,6 +77,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int screenWidth;
         int screenHeight;
 
+        int score = 0;
+
+        boolean hit = false;
+        boolean speedUp = false;
+
         public GameSurface(Context context) {
             super(context);
 
@@ -92,15 +100,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             paintProperty= new Paint();
             paintProperty.setTextSize(100);
 
+            this.setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    speedUp = !speedUp;
+
+                    return false;
+                }
+            });
+
         }
 
         @Override
         public void run() {
             int value = 5;
-            int enemyXVal = (int)(Math.random() * (screenWidth - 50)) + 50;
+            int enemyXVal = (int)(Math.random() * (screenWidth - 100)) + 100;
             int enemyYVal = 0;
             while (running){
-
+                Log.d("UGH", running + "");
                 if (!holder.getSurface().isValid())
                     continue;
 
@@ -124,13 +141,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 Rect hitBox = new Rect(100 + value, 2000, 100 + value + myImage.getWidth(), 2000 + myImage.getHeight());
                 Rect enemyHitBox = new Rect(enemyXVal, enemyYVal, enemyXVal + enemy.getWidth(), enemyYVal + enemy.getHeight());
-                //canvas.drawRect(enemyHitBox, new Paint());
-                enemyYVal += 25;
+               // canvas.drawRect(hitBox, new Paint());
+                canvas.drawRect(enemyHitBox, new Paint());
+                Paint text = new Paint();
+                text.setTextSize(50.0f);
+                canvas.drawText("Score: " + score, 50.0f, 50.0f, text);
+                if(!speedUp){
+                    enemyYVal += 25;
+                }
+                else if(speedUp){
+                    enemyYVal += 50;
+                }
+
 
                 if(enemyYVal >= screenHeight){
                     enemyYVal = 0;
-                    enemyXVal = (int)(Math.random() * (screenWidth - 50)) + 50;
+                    enemyXVal = (int)(Math.random() * (screenWidth - 100)) + 100;
+                    score++;
                 }
+
+                if(enemyHitBox.intersect(hitBox)){
+                    canvas.drawBitmap(myImage2,100+value, 2000, null);
+
+
+                    //INSERT DELAY HERE
+
+
+                    enemyYVal = 0;
+                    enemyXVal = (int)(Math.random() * (screenWidth - 100)) + 100;
+
+                }
+
+
 
                 holder.unlockCanvasAndPost(canvas);
             }//while running
