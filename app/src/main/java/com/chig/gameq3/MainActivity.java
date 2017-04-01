@@ -140,15 +140,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 Rect hitBox = new Rect(100 + value, 2000, 100 + value + myImage.getWidth(), 2000 + myImage.getHeight());
                 Rect enemyHitBox = new Rect(enemyXVal, enemyYVal, enemyXVal + enemy.getWidth(), enemyYVal + enemy.getHeight());
-                canvas.drawRect(hitBox, new Paint());
+                //canvas.drawRect(hitBox, new Paint());
                 canvas.drawRect(enemyHitBox, new Paint());
                 Paint text = new Paint();
-                text.setTextSize(50.0f);
-                canvas.drawText("Score: " + score, 50.0f, 50.0f, text);
+                text.setTextSize(100.0f);
+                canvas.drawText("Score: " + score, 50.0f, 80.0f, text);
                 if(100 + value <= 0){
                     value = -100;
                     canvas.drawBitmap(myImage, 0, 2000, null);
                     hitBox = new Rect(0, 2000, 0 + myImage.getWidth(), 2000 + myImage.getHeight());
+                }
+
+                if((100 + value) >= screenWidth - myImage.getWidth()){
+                    value = screenWidth - myImage.getWidth() - 100;
+                    canvas.drawBitmap(myImage, screenWidth - 50, 2000, null);
+                    hitBox = new Rect(screenWidth - 50, 2000, screenWidth, 2000 + myImage.getHeight());
                 }
 
 
