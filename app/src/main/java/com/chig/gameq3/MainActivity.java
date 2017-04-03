@@ -10,6 +10,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     GameSurface gameSurface;
     CountDownTimer timer;
     int time = 30;
+    SoundPool soundPool;
+    int soundPoolID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         };
         timer.start();
+
+        soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        soundPoolID = soundPool.load(this, R.raw.background, 1);
+
+        AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
+        float vol = (float)audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+        soundPool.play(soundPoolID, vol, vol, 1, -1, 1);
+
     }
 
     @Override
@@ -103,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         boolean speedUp = false;
         boolean gameOver = false;
         long start = System.currentTimeMillis();
+        MediaPlayer player;
 
         public GameSurface(Context context) {
             super(context);
@@ -134,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             });
 
+            player = MediaPlayer.create(MainActivity.this, R.raw.crash);
         }
 
         @Override
@@ -176,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Rect hitBox = new Rect(100 + value, 2000, 100 + value + myImage.getWidth(), 2000 + myImage.getHeight());
                 Rect enemyHitBox = new Rect(enemyXVal, enemyYVal, enemyXVal + enemy.getWidth(), enemyYVal + enemy.getHeight());
                 //canvas.drawRect(hitBox, new Paint());
-                canvas.drawRect(enemyHitBox, new Paint());
+                //canvas.drawRect(enemyHitBox, new Paint());
                 Paint text = new Paint();
                 text.setTextSize(100.0f);
                 canvas.drawText("Score: " + score, 50.0f, 80.0f, text);
@@ -213,13 +229,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     hitCount = 0;
                     enemyYVal = 0;
                     enemyXVal = (int)(Math.random() * (screenWidth - 100)) + 100;
-
-
+                    player.start();
                 }
 
                 if(time == 0){
                     running = false;
                     canvas.drawText("GAME OVER, SCORE: " + score, 150, screenHeight / 2, textGameOver);
+                    soundPool.stop(soundPoolID);
                 }
                 Log.d("LOL", time + "");
 
