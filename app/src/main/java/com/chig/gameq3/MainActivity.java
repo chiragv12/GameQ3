@@ -60,7 +60,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         };
         timer.start();
 
-        soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        SoundPool.Builder builder = new SoundPool.Builder();
+        builder.setMaxStreams(2);
+        soundPool = builder.build();
         soundPoolID = soundPool.load(this, R.raw.background, 1);
 
         AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
